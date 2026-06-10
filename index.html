@@ -1,0 +1,504 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arbitrage vs Platform | 親友交易決策儀表板</title>
+  <!-- 引入 Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 ECharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- 標頭區 -->
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6">
+      <div>
+        <h1 class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+          Arbitrage vs Platform
+        </h1>
+        <p class="text-slate-400 text-sm mt-1">「肥水不落外人田」親友交易決策套利分析儀表板</p>
+      </div>
+      <!-- 快速帶入按鈕 -->
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+        <button onclick="loadScenario('car')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 transition rounded-lg text-xs font-semibold shadow-md shadow-blue-900/30">
+          🚗 一鍵帶入：十萬二手車交易
+        </button>
+        <button onclick="loadScenario('phone')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 transition rounded-lg text-xs font-semibold">
+          📱 一鍵帶入：三萬高階手機
+        </button>
+      </div>
+    </header>
+
+    <!-- 控制面板區 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- 買家設定 (左) -->
+      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6 backdrop-blur-sm">
+        <div class="flex items-center space-x-2 mb-6">
+          <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+          </div>
+          <h2 class="text-xl font-bold text-blue-400">買家參數設定 (回饋)</h2>
+        </div>
+        
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">模擬交易金額 (NT$)</label>
+            <div class="relative mt-1">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 font-bold">$</span>
+              <input type="number" id="testPrice" value="100000" class="block w-full pl-8 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-bold text-slate-100" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">信用卡回饋率 (%)</label>
+              <input type="number" step="0.1" id="ccRate" value="4.5" class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-200" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">回饋上限 ($)</label>
+              <input type="number" id="ccCap" value="5000" class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-200" />
+            </div>
+          </div>
+
+          <div class="border-t border-slate-700/50 pt-4">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">額外活動回饋優惠 (同群組活動會自動擇優套用)</label>
+            
+            <!-- 動態活動列表 -->
+            <div id="promoListContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <!-- JS 動態渲染 -->
+            </div>
+            
+            <!-- 新增自訂活動表單 -->
+            <div class="mt-4 p-4 bg-slate-900/40 rounded-xl border border-slate-700/50 space-y-3">
+              <p class="text-xs text-slate-400 font-semibold flex items-center">
+                <span class="text-blue-400 mr-1">➕</span> 新增自訂活動
+              </p>
+              <div class="grid grid-cols-2 gap-3">
+                <input type="text" id="newPromoName" placeholder="活動名稱 (例: 滿額送點)" class="col-span-2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                <input type="text" id="newPromoGroup" placeholder="活動群組 (例: 618年中慶)" class="col-span-2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                <input type="number" id="newPromoThreshold" placeholder="滿額門檻 ($)" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                <select id="newPromoType" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <option value="fixed">固定金額 ($)</option>
+                  <option value="percent">百分比 (%)</option>
+                </select>
+                <input type="number" step="0.1" id="newPromoValue" placeholder="回饋數值" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                <input type="number" id="newPromoCap" placeholder="上限 ($) (百分比用)" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+              <button id="addPromoBtn" class="w-full py-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 text-xs font-bold rounded-lg transition">新增並套用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 賣家設定 (右) -->
+      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6 backdrop-blur-sm">
+        <div class="flex items-center space-x-2 mb-6">
+          <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h2 class="text-xl font-bold text-rose-400">賣家參數設定 (手續費)</h2>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">賣家身分模式</label>
+            <select id="sellerType" class="mt-1 block w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-200">
+              <option value="general">一般賣家 (單件手續費上限 $35,000 計算)</option>
+              <option value="mall">商城賣家 (無成交費上限限制)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">商品分類基本成交費率 (%)</label>
+            <input type="number" step="0.1" id="categoryRate" value="4.0" class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-200" />
+            <p class="text-xs text-slate-500 mt-1.5">例如：汽車類為 4.0%，手機/3C 類為 5.0%</p>
+          </div>
+
+          <div class="border-t border-slate-700/50 pt-4">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">平台必備與行銷專案費</label>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-700/40 opacity-75">
+                <div class="flex items-center space-x-3">
+                  <input type="checkbox" checked disabled class="h-5 w-5 text-rose-600 rounded bg-slate-950 border-slate-700" />
+                  <span class="text-sm font-medium">金流與系統處理費</span>
+                </div>
+                <span class="text-xs bg-rose-950/40 text-rose-400 px-2.5 py-1 rounded font-bold">2.5% 無上限</span>
+              </div>
+
+              <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-700/40">
+                <div class="flex flex-col">
+                  <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="hasShippingFee" class="h-5 w-5 text-rose-600 rounded bg-slate-950 border-slate-700 focus:ring-rose-500" />
+                    <span class="text-sm font-medium">免運專案服務費</span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 mt-1 ml-8">系統自動擇優：6% 或 固定$60</span>
+                </div>
+                <span id="shippingAppliedBadge" class="text-xs bg-slate-800 text-slate-500 px-2.5 py-1 rounded">未啟用</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 即時決策卡片區 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- 買家總獲得 -->
+      <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-blue-500/5 pointer-events-none">
+          <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path></svg>
+        </div>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">買家總獲得回饋</p>
+        <p class="text-3xl font-black text-blue-400 mt-2" id="uiBuyerReward">$0</p>
+        <div class="text-xs text-slate-500 mt-2" id="uiBuyerDetail">刷卡回饋: $0 | 活動: $0</div>
+      </div>
+
+      <!-- 賣家總支出 -->
+      <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-rose-500/5 pointer-events-none">
+          <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"></path></svg>
+        </div>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">賣家總支出手續費</p>
+        <p class="text-3xl font-black text-rose-400 mt-2" id="uiSellerFee">$0</p>
+        <div class="text-xs text-slate-500 mt-2" id="uiSellerDetail">成交費: $0 | 金流費: $0</div>
+      </div>
+
+      <!-- 最終損益 -->
+      <div id="uiNetCard" class="rounded-2xl p-6 relative overflow-hidden transition-all duration-300">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">整體資產淨盈虧 (利差)</p>
+        <p class="text-4xl font-black mt-2" id="uiNetProfit">$0</p>
+        <div class="text-sm font-bold mt-2" id="uiNetDesc">計算中...</div>
+      </div>
+
+    </div>
+
+    <!-- 折線圖 -->
+    <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-slate-200">交易金額變動 vs 親友團淨盈虧</h3>
+          <p class="text-xs text-slate-400 mt-1">橫軸為模擬交易金額（0 至 20 萬），縱軸為整體盈虧（基準線以上為套利，以下為虧損）</p>
+        </div>
+        <div class="mt-2 md:mt-0 flex items-center space-x-2 text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+          <span class="w-3 h-3 bg-blue-500 rounded-full inline-block"></span>
+          <span>盈虧曲線</span>
+        </div>
+      </div>
+      <div id="chartContainer" class="w-full" style="height: 380px;"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // 綁定 DOM 控制項
+    const inputs = {
+      price: document.getElementById('testPrice'),
+      ccRate: document.getElementById('ccRate'),
+      ccCap: document.getElementById('ccCap'),
+      sellerType: document.getElementById('sellerType'),
+      categoryRate: document.getElementById('categoryRate'),
+      hasShippingFee: document.getElementById('hasShippingFee')
+    };
+
+    const ui = {
+      buyerReward: document.getElementById('uiBuyerReward'),
+      buyerDetail: document.getElementById('uiBuyerDetail'),
+      sellerFee: document.getElementById('uiSellerFee'),
+      sellerDetail: document.getElementById('uiSellerDetail'),
+      netProfit: document.getElementById('uiNetProfit'),
+      netCard: document.getElementById('uiNetCard'),
+      netDesc: document.getElementById('uiNetDesc'),
+      shippingBadge: document.getElementById('shippingAppliedBadge')
+    };
+
+    // 擴展活動資料結構：引進 group (群組) 的概念
+    let promos = [
+      { id: 'promo_1', name: '6.18年中慶 (滿12k送800)', group: '6.18年中慶', threshold: 12000, type: 'fixed', value: 800, cap: 800, checked: true },
+      { id: 'promo_2', name: '6.18年中慶 (滿26k送1800)', group: '6.18年中慶', threshold: 26000, type: 'fixed', value: 1800, cap: 1800, checked: true },
+      { id: 'promo_3', name: '6月全月活動 (滿5k享16.5%)', group: '6月全月', threshold: 5000, type: 'percent', value: 16.5, cap: 300, checked: true }
+    ];
+
+    // 渲染活動列表
+    function renderPromos() {
+      const container = document.getElementById('promoListContainer');
+      container.innerHTML = promos.map(p => `
+        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-700/40">
+          <div class="flex items-center space-x-3">
+            <input type="checkbox" id="${p.id}" ${p.checked ? 'checked' : ''} onchange="togglePromo('${p.id}')" class="h-5 w-5 text-blue-600 rounded bg-slate-950 border-slate-700 focus:ring-blue-500" />
+            <div class="flex flex-col">
+              <span class="text-sm font-medium">${p.name}</span>
+              <span class="text-[10px] text-slate-500 mt-0.5">群組: ${p.group || '無'} | 門檻: $${p.threshold.toLocaleString()} | 回饋: ${p.type === 'fixed' ? '$' + p.value : p.value + '%'}</span>
+            </div>
+          </div>
+          <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded border border-slate-700/50">上限 $${p.cap.toLocaleString()}</span>
+        </div>
+      `).join('');
+    }
+
+    window.togglePromo = function(id) {
+      const promo = promos.find(p => p.id === id);
+      if (promo) {
+        promo.checked = !promo.checked;
+        updateDashboard();
+      }
+    }
+
+    // 新增自訂活動 logic
+    document.getElementById('addPromoBtn').addEventListener('click', () => {
+      const name = document.getElementById('newPromoName').value || '自訂活動';
+      const group = document.getElementById('newPromoGroup').value || '獨立活動';
+      const threshold = parseFloat(document.getElementById('newPromoThreshold').value) || 0;
+      const type = document.getElementById('newPromoType').value;
+      const value = parseFloat(document.getElementById('newPromoValue').value) || 0;
+      const cap = parseFloat(document.getElementById('newPromoCap').value) || value;
+      
+      promos.push({ 
+        id: 'promo_' + Date.now(), 
+        name, 
+        group,
+        threshold, 
+        type, 
+        value, 
+        cap, 
+        checked: true 
+      });
+      
+      // 清空輸入欄
+      document.getElementById('newPromoName').value = '';
+      document.getElementById('newPromoGroup').value = '';
+      document.getElementById('newPromoThreshold').value = '';
+      document.getElementById('newPromoValue').value = '';
+      document.getElementById('newPromoCap').value = '';
+      
+      renderPromos();
+      updateDashboard();
+    });
+
+    // 初始化 ECharts
+    let myChart = echarts.init(document.getElementById('chartContainer'), 'dark');
+
+    // 核心計算修正：擇優同一群組中達成的最高門檻活動
+    function calculateData(p) {
+      const price = parseFloat(p) || 0;
+      const ccR = parseFloat(inputs.ccRate.value) || 0;
+      const ccC = parseFloat(inputs.ccCap.value) || 0;
+      const catR = parseFloat(inputs.categoryRate.value) || 0;
+
+      // 1. 買家信用卡回饋
+      const ccReward = Math.min(price * (ccR / 100), ccC);
+      
+      // 2. 買家額外活動：同群組擇優計算法
+      const qualifiedByGroup = {};
+      promos.forEach(promo => {
+        if (promo.checked && price >= promo.threshold) {
+          const groupName = promo.group || promo.id; // 若無群組，視為獨立活動
+          
+          // 計算單一活動能帶來的回饋金
+          let reward = 0;
+          if (promo.type === 'fixed') {
+            reward = promo.value;
+          } else {
+            reward = Math.min(price * (promo.value / 100), promo.cap);
+          }
+
+          // 核心邏輯：如果此群組還沒記錄，或者目前活動的門檻比已記錄的更高，則更新它
+          if (!qualifiedByGroup[groupName] || promo.threshold > qualifiedByGroup[groupName].threshold) {
+            qualifiedByGroup[groupName] = {
+              reward: reward,
+              threshold: promo.threshold
+            };
+          }
+        }
+      });
+
+      // 累加所有群組最終選出的最高回饋
+      let promoReward = 0;
+      for (const group in qualifiedByGroup) {
+        promoReward += qualifiedByGroup[group].reward;
+      }
+
+      const totalBuyer = Math.floor(ccReward + promoReward);
+
+      // 3. 賣家手續費計算
+      const baseFeeAmount = inputs.sellerType.value === 'general' ? Math.min(price, 35000) : price;
+      const categoryFee = Math.round(baseFeeAmount * (catR / 100));
+      const paymentFee = Math.round(price * 0.025); // 2.5% 金流費
+      
+      // 免運方案自動擇優 (6% vs 固定 60)
+      let shippingFee = 0;
+      if (inputs.hasShippingFee.checked) {
+        shippingFee = Math.round(Math.min(price * 0.06, 60));
+      }
+      
+      const totalSeller = categoryFee + paymentFee + shippingFee;
+
+      return {
+        buyer: totalBuyer,
+        buyerCc: Math.floor(ccReward),
+        buyerPromo: Math.floor(promoReward),
+        seller: totalSeller,
+        sellerCat: categoryFee,
+        sellerPay: paymentFee,
+        sellerShip: shippingFee,
+        net: totalBuyer - totalSeller
+      };
+    }
+
+    // 更新儀表板
+    function updateDashboard() {
+      const currentPrice = parseFloat(inputs.price.value) || 0;
+      const result = calculateData(currentPrice);
+
+      // 更新買家區
+      ui.buyerReward.innerText = `+ $${result.buyer.toLocaleString()}`;
+      ui.buyerDetail.innerText = `信用卡回饋: $${result.buyerCc.toLocaleString()} | 活動擇優加總: $${result.buyerPromo.toLocaleString()}`;
+
+      // 更新賣家區
+      ui.sellerFee.innerText = `- $${result.seller.toLocaleString()}`;
+      ui.sellerDetail.innerText = `成交費: $${result.sellerCat.toLocaleString()} | 金流費: $${result.sellerPay.toLocaleString()}${result.sellerShip > 0 ? ' | 免運費: $' + result.sellerShip.toLocaleString() : ''}`;
+
+      // 更新免運徽章狀態
+      if (inputs.hasShippingFee.checked) {
+        const p = parseFloat(inputs.price.value) || 0;
+        if (p * 0.06 <= 60) {
+          ui.shippingBadge.innerText = `已自動擇優: 6% ($${result.sellerShip})`;
+          ui.shippingBadge.className = "text-xs bg-emerald-900/40 text-emerald-400 px-2.5 py-1 rounded font-bold border border-emerald-800/50";
+        } else {
+          ui.shippingBadge.innerText = `已自動擇優: 固定 $60`;
+          ui.shippingBadge.className = "text-xs bg-blue-900/40 text-blue-400 px-2.5 py-1 rounded font-bold border border-blue-800/50";
+        }
+      } else {
+        ui.shippingBadge.innerText = "未啟用";
+        ui.shippingBadge.className = "text-xs bg-slate-800 text-slate-500 px-2.5 py-1 rounded";
+      }
+
+      // 更新盈虧結果
+      const isProfit = result.net >= 0;
+      ui.netProfit.innerText = `${isProfit ? '+' : ''}$${result.net.toLocaleString()}`;
+      
+      if (isProfit) {
+        ui.netProfit.className = "text-4xl font-black text-emerald-400 mt-2";
+        ui.netCard.className = "rounded-2xl p-6 relative overflow-hidden transition-all duration-300 bg-emerald-500/10 border border-emerald-500/30";
+        ui.netDesc.className = "text-sm font-bold text-emerald-400 mt-2";
+        ui.netDesc.innerText = "👍 套利成功！此方案能成功賺得平台利差。";
+      } else {
+        ui.netProfit.className = "text-4xl font-black text-rose-400 mt-2";
+        ui.netCard.className = "rounded-2xl p-6 relative overflow-hidden transition-all duration-300 bg-rose-500/10 border border-rose-500/30";
+        ui.netDesc.className = "text-sm font-bold text-rose-400 mt-2";
+        ui.netDesc.innerText = "❌ 平台反噬！手續費已超越回饋，私下現金更划算。";
+      }
+
+      // 產生趨勢圖數據 (0 ~ 20 萬，每 5000 元一個節點)
+      const xData = [];
+      const yData = [];
+      for (let val = 0; val <= 200000; val += 5000) {
+        xData.push(val);
+        yData.push(calculateData(val).net);
+      }
+
+      // 渲染 ECharts
+      myChart.setOption({
+        backgroundColor: 'transparent',
+        grid: { top: 15, right: 15, bottom: 25, left: 60 },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#0f172a',
+          borderColor: '#334155',
+          textStyle: { color: '#f1f5f9' },
+          formatter: function (params) {
+            let val = params[0].value;
+            let amount = params[0].axisValue;
+            let profitColor = val >= 0 ? '#34d399' : '#f87171';
+            return `<div class="p-1">
+                      <div class="text-xs text-slate-400">交易金額: <span class="font-bold text-slate-200">$${parseInt(amount).toLocaleString()}</span></div>
+                      <div class="text-xs mt-1">親友盈虧: <span class="font-black" style="color: ${profitColor}">$${val.toLocaleString()}</span></div>
+                    </div>`;
+          }
+        },
+        xAxis: {
+          type: 'category',
+          data: xData,
+          axisLabel: { formatter: (val) => `$${val/1000}k`, color: '#94a3b8' },
+          axisLine: { lineStyle: { color: '#334155' } },
+          splitLine: { show: false }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: '#94a3b8' },
+          axisLine: { show: false },
+          splitLine: { lineStyle: { color: '#1e293b' } }
+        },
+        series: [{
+          data: yData,
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+          lineStyle: { width: 3.5, color: '#3b82f6' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(59, 130, 246, 0.25)' },
+              { offset: 1, color: 'rgba(59, 130, 246, 0)' }
+            ])
+          },
+          markLine: {
+            symbol: ['none', 'none'],
+            data: [{ yAxis: 0 }],
+            lineStyle: { color: '#f87171', type: 'dashed', width: 1.5 },
+            label: { show: false }
+          }
+        }]
+      });
+    }
+
+    // 載入情境
+    function loadScenario(type) {
+      if (type === 'car') {
+        inputs.price.value = 100000;
+        inputs.ccRate.value = 4.5;
+        inputs.ccCap.value = 5000;
+        promos.forEach(p => p.checked = false); // 二手車分類一般排除活動
+        inputs.sellerType.value = 'general';
+        inputs.categoryRate.value = 4.0;
+        inputs.hasShippingFee.checked = false;
+      } else if (type === 'phone') {
+        inputs.price.value = 30000;
+        inputs.ccRate.value = 4.5;
+        inputs.ccCap.value = 1500;
+        // 預設開啟第一個 6.18 年中慶活動
+        promos.forEach((p, index) => p.checked = (p.group === '6.18年中慶' || index === 2)); 
+        inputs.sellerType.value = 'general';
+        inputs.categoryRate.value = 5.0; // 手機平板與周邊為 5% 成交費
+        inputs.hasShippingFee.checked = true;
+      }
+      renderPromos();
+      updateDashboard();
+    }
+
+    // 註冊所有輸入變更監聽器
+    Object.values(inputs).forEach(input => {
+      input.addEventListener('input', updateDashboard);
+      input.addEventListener('change', updateDashboard);
+    });
+
+    window.addEventListener('resize', () => myChart.resize());
+
+    // 預設啟動
+    renderPromos();
+    updateDashboard();
+  </script>
+</body>
+</html>
+
+```

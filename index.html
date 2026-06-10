@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> MSIM 肥水不落外人田專案 | 交易決策儀表板</title>
+  <title>Arbitrage vs Platform | 親友交易決策儀表板</title>
   <!-- 引入 Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- 引入 ECharts CDN -->
@@ -11,27 +11,71 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      /* 模擬雨夜城市街景的暗調格線背景 */
+      background-color: #020617;
+      background-image: 
+        linear-gradient(rgba(6, 182, 212, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(244, 63, 94, 0.01) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(244, 63, 94, 0.01) 2px, transparent 2px);
+      background-size: 40px 40px, 40px 40px, 120px 120px, 120px 120px;
+    }
+
+    /* 霓虹黑色電影風格：經典青色(Cyan)發光 */
+    .neon-glow-cyan {
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.15), inset 0 0 15px rgba(34, 211, 238, 0.05);
+      border-color: rgba(34, 211, 238, 0.3);
+    }
+    .neon-text-cyan {
+      text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+    }
+
+    /* 霓虹黑色電影風格：電光粉(Rose)發光 */
+    .neon-glow-rose {
+      box-shadow: 0 0 15px rgba(244, 63, 94, 0.15), inset 0 0 15px rgba(244, 63, 94, 0.05);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+    .neon-text-rose {
+      text-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+    }
+
+    /* 霓虹黑色電影風格：極光綠(Emerald)發光 */
+    .neon-glow-emerald {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.25), inset 0 0 15px rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .neon-text-emerald {
+      text-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    }
+
+    /* 自訂極暗玻璃質感面板 */
+    .cyber-panel {
+      background: rgba(11, 17, 32, 0.85);
+      backdrop-filter: blur(8px);
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+<body class="text-slate-200 min-h-screen p-4 md:p-8">
 
   <div class="max-w-6xl mx-auto space-y-6">
     
     <!-- 標頭區 -->
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6">
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800/80 pb-6">
       <div>
-        <h1 class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-          Arbitrage vs Platform
+        <h1 class="text-4xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400" style="text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
+          MISM 肥水不落外人田專案
         </h1>
-        <p class="text-slate-400 text-sm mt-1">交易決策套利分析儀表板</p>
+        <p class="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1.5 flex items-center">
+          <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full inline-block mr-2 animate-pulse"></span>
+          My Shit Is Mine 交易決策套利分析儀表板
+        </p>
       </div>
       <!-- 快速帶入按鈕 -->
-      <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
-        <button onclick="loadScenario('car')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 transition rounded-lg text-xs font-semibold shadow-md shadow-blue-900/30">
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+        <button onclick="loadScenario('car')" class="px-5 py-2.5 bg-slate-900 hover:bg-cyan-950/40 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400 transition-all rounded-lg text-xs font-bold tracking-widest neon-glow-cyan">
           🚗 一鍵帶入：十萬二手車交易
         </button>
-        <button onclick="loadScenario('phone')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 transition rounded-lg text-xs font-semibold">
+        <button onclick="loadScenario('phone')" class="px-5 py-2.5 bg-slate-900 hover:bg-rose-950/40 text-rose-400 border border-rose-500/30 hover:border-rose-400 transition-all rounded-lg text-xs font-bold tracking-widest neon-glow-rose">
           📱 一鍵帶入：三萬高階手機
         </button>
       </div>
@@ -41,36 +85,36 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
       <!-- 買家設定 (左) -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6 backdrop-blur-sm">
-        <div class="flex items-center space-x-2 mb-6">
-          <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+      <div class="cyber-panel border rounded-2xl p-6 neon-glow-cyan">
+        <div class="flex items-center space-x-3 mb-6 border-b border-slate-800/80 pb-4">
+          <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
           </div>
-          <h2 class="text-xl font-bold text-blue-400">買家參數設定 (回饋)</h2>
+          <h2 class="text-xl font-bold tracking-wider text-cyan-400 uppercase neon-text-cyan">買家參數設定 // 回饋額</h2>
         </div>
         
         <div class="space-y-5">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">模擬交易金額 (NT$)</label>
-            <div class="relative mt-1">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 font-bold">$</span>
-              <input type="number" id="testPrice" value="100000" class="block w-full pl-8 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-bold text-slate-100" />
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest">模擬交易金額 (NT$)</label>
+            <div class="relative mt-1.5">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-cyan-500 font-bold">$</span>
+              <input type="number" id="testPrice" value="100000" class="block w-full pl-8 pr-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-lg font-black text-cyan-300" />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">信用卡回饋率 (%)</label>
-              <input type="number" step="0.1" id="ccRate" value="4.5" class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-200" />
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest">信用卡回饋率 (%)</label>
+              <input type="number" step="0.1" id="ccRate" value="4.5" class="mt-1.5 block w-full px-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-slate-200" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">回饋上限 ($)</label>
-              <input type="number" id="ccCap" value="5000" class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-200" />
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest">回饋上限 ($)</label>
+              <input type="number" id="ccCap" value="5000" class="mt-1.5 block w-full px-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-slate-200" />
             </div>
           </div>
 
-          <div class="border-t border-slate-700/50 pt-4">
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">額外活動回饋優惠 (同群組活動會自動擇優套用)</label>
+          <div class="border-t border-slate-800/80 pt-4">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">額外活動回饋優惠 (同群組活動自動擇優)</label>
             
             <!-- 動態活動列表 -->
             <div id="promoListContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1">
@@ -78,71 +122,71 @@
             </div>
             
             <!-- 新增自訂活動表單 -->
-            <div class="mt-4 p-4 bg-slate-900/40 rounded-xl border border-slate-700/50 space-y-3">
-              <p class="text-xs text-slate-400 font-semibold flex items-center">
-                <span class="text-blue-400 mr-1">➕</span> 新增自訂活動
+            <div class="mt-4 p-4 bg-slate-950/50 rounded-xl border border-slate-800/80 space-y-3">
+              <p class="text-xs text-cyan-400 font-bold flex items-center tracking-wider">
+                <span class="mr-1.5">⚡</span> 新增自訂優惠活動
               </p>
               <div class="grid grid-cols-2 gap-3">
-                <input type="text" id="newPromoName" placeholder="活動名稱 (例: 滿額送點)" class="col-span-2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                <input type="text" id="newPromoGroup" placeholder="活動群組 (例: 618年中慶)" class="col-span-2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                <input type="number" id="newPromoThreshold" placeholder="滿額門檻 ($)" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                <select id="newPromoType" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <input type="text" id="newPromoName" placeholder="活動名稱 (例: 滿額送點)" class="col-span-2 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
+                <input type="text" id="newPromoGroup" placeholder="活動群組 (例: 618年中慶)" class="col-span-2 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
+                <input type="number" id="newPromoThreshold" placeholder="滿額門檻 ($)" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
+                <select id="newPromoType" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-cyan-400">
                   <option value="fixed">固定金額 ($)</option>
                   <option value="percent">百分比 (%)</option>
                 </select>
-                <input type="number" step="0.1" id="newPromoValue" placeholder="回饋數值" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                <input type="number" id="newPromoCap" placeholder="上限 ($) (百分比用)" class="px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                <input type="number" step="0.1" id="newPromoValue" placeholder="回饋數值" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
+                <input type="number" id="newPromoCap" placeholder="上限 ($) (百分比用)" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
               </div>
-              <button id="addPromoBtn" class="w-full py-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 text-xs font-bold rounded-lg transition">新增並套用</button>
+              <button id="addPromoBtn" class="w-full py-2 bg-cyan-950/30 hover:bg-cyan-500/20 text-cyan-400 text-xs font-bold rounded-lg border border-cyan-500/20 transition duration-300 uppercase tracking-widest">新增並套用</button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 賣家設定 (右) -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6 backdrop-blur-sm">
-        <div class="flex items-center space-x-2 mb-6">
+      <div class="cyber-panel border rounded-2xl p-6 neon-glow-rose">
+        <div class="flex items-center space-x-3 mb-6 border-b border-slate-800/80 pb-4">
           <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
-          <h2 class="text-xl font-bold text-rose-400">賣家參數設定 (手續費)</h2>
+          <h2 class="text-xl font-bold tracking-wider text-rose-400 uppercase neon-text-rose">賣家參數設定 // 手續費</h2>
         </div>
 
         <div class="space-y-5">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">賣家身分模式</label>
-            <select id="sellerType" class="mt-1 block w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-200">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest">賣家身分模式</label>
+            <select id="sellerType" class="mt-1.5 block w-full px-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 text-slate-200">
               <option value="general">一般賣家 (單件手續費上限 $35,000 計算)</option>
               <option value="mall">商城賣家 (無成交費上限限制)</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">商品分類基本成交費率 (%)</label>
-            <input type="number" step="0.1" id="categoryRate" value="4.0" class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-200" />
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest">商品分類基本成交費率 (%)</label>
+            <input type="number" step="0.1" id="categoryRate" value="4.0" class="mt-1.5 block w-full px-3 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 text-slate-200" />
             <p class="text-xs text-slate-500 mt-1.5">例如：汽車類為 4.0%，手機/3C 類為 5.0%</p>
           </div>
 
-          <div class="border-t border-slate-700/50 pt-4">
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">平台必備與行銷專案費</label>
+          <div class="border-t border-slate-800/80 pt-4">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">平台必備與行銷專案費</label>
             <div class="space-y-2">
-              <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-700/40 opacity-75">
+              <div class="flex items-center justify-between p-3.5 bg-slate-950/40 rounded-xl border border-slate-800/80 opacity-75">
                 <div class="flex items-center space-x-3">
-                  <input type="checkbox" checked disabled class="h-5 w-5 text-rose-600 rounded bg-slate-950 border-slate-700" />
-                  <span class="text-sm font-medium">金流與系統處理費</span>
+                  <input type="checkbox" checked disabled class="h-5 w-5 text-rose-600 rounded bg-slate-950 border-slate-800 focus:ring-rose-500 focus:ring-offset-slate-900" />
+                  <span class="text-sm font-semibold text-slate-300">金流與系統處理費</span>
                 </div>
-                <span class="text-xs bg-rose-950/40 text-rose-400 px-2.5 py-1 rounded font-bold">2.5% 無上限</span>
+                <span class="text-xs bg-rose-950/50 text-rose-400 px-3 py-1 rounded font-bold border border-rose-500/20">2.5% 無上限</span>
               </div>
 
-              <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-700/40">
+              <div class="flex items-center justify-between p-3.5 bg-slate-950/40 rounded-xl border border-slate-800/80">
                 <div class="flex flex-col">
                   <div class="flex items-center space-x-3">
-                    <input type="checkbox" id="hasShippingFee" class="h-5 w-5 text-rose-600 rounded bg-slate-950 border-slate-700 focus:ring-rose-500" />
-                    <span class="text-sm font-medium">免運專案服務費</span>
+                    <input type="checkbox" id="hasShippingFee" class="h-5 w-5 text-rose-600 rounded bg-slate-950 border-slate-800 focus:ring-rose-500 focus:ring-offset-slate-900" />
+                    <span class="text-sm font-semibold text-slate-300">免運專案服務費</span>
                   </div>
-                  <span class="text-[10px] text-slate-500 mt-1 ml-8">系統自動擇優：6% 或 固定$60</span>
+                  <span class="text-[10px] text-slate-500 mt-1.5 ml-8">智慧判斷最優惠方案：6% 或 固定$60</span>
                 </div>
-                <span id="shippingAppliedBadge" class="text-xs bg-slate-800 text-slate-500 px-2.5 py-1 rounded">未啟用</span>
+                <span id="shippingAppliedBadge" class="text-xs bg-slate-950 text-slate-500 px-3 py-1 rounded font-semibold border border-slate-800">未啟用</span>
               </div>
             </div>
           </div>
@@ -155,44 +199,44 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
       <!-- 買家總獲得 -->
-      <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 relative overflow-hidden">
-        <div class="absolute -right-4 -bottom-4 text-blue-500/5 pointer-events-none">
+      <div class="cyber-panel border border-slate-800 rounded-2xl p-6 relative overflow-hidden neon-glow-cyan">
+        <div class="absolute -right-4 -bottom-4 text-cyan-500/5 pointer-events-none">
           <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path></svg>
         </div>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">買家總獲得回饋</p>
-        <p class="text-3xl font-black text-blue-400 mt-2" id="uiBuyerReward">$0</p>
-        <div class="text-xs text-slate-500 mt-2" id="uiBuyerDetail">刷卡回饋: $0 | 活動: $0</div>
+        <p class="text-xs font-bold text-cyan-400 uppercase tracking-widest neon-text-cyan">買家獲得總回饋 (INFLOW)</p>
+        <p class="text-4xl font-black text-cyan-300 mt-3" id="uiBuyerReward">$0</p>
+        <div class="text-xs text-slate-500 font-semibold mt-2.5" id="uiBuyerDetail">刷卡回饋: $0 | 加碼活動: $0</div>
       </div>
 
       <!-- 賣家總支出 -->
-      <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 relative overflow-hidden">
+      <div class="cyber-panel border border-slate-800 rounded-2xl p-6 relative overflow-hidden neon-glow-rose">
         <div class="absolute -right-4 -bottom-4 text-rose-500/5 pointer-events-none">
           <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"></path></svg>
         </div>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">賣家總支出手續費</p>
-        <p class="text-3xl font-black text-rose-400 mt-2" id="uiSellerFee">$0</p>
-        <div class="text-xs text-slate-500 mt-2" id="uiSellerDetail">成交費: $0 | 金流費: $0</div>
+        <p class="text-xs font-bold text-rose-400 uppercase tracking-widest neon-text-rose">賣家總支出手續費 (OUTFLOW)</p>
+        <p class="text-4xl font-black text-rose-300 mt-3" id="uiSellerFee">$0</p>
+        <div class="text-xs text-slate-500 font-semibold mt-2.5" id="uiSellerDetail">成交手續費: $0 | 系統金流費: $0</div>
       </div>
 
       <!-- 最終損益 -->
-      <div id="uiNetCard" class="rounded-2xl p-6 relative overflow-hidden transition-all duration-300">
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">整體資產淨盈虧 (利差)</p>
-        <p class="text-4xl font-black mt-2" id="uiNetProfit">$0</p>
-        <div class="text-sm font-bold mt-2" id="uiNetDesc">計算中...</div>
+      <div id="uiNetCard" class="rounded-2xl p-6 relative overflow-hidden transition-all duration-300 border">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">整體利差資產淨損益 (SPREAD)</p>
+        <p class="text-5xl font-black mt-3" id="uiNetProfit">$0</p>
+        <div class="text-sm font-bold mt-3" id="uiNetDesc">分析系統準備中...</div>
       </div>
 
     </div>
 
     <!-- 折線圖 -->
-    <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+    <div class="cyber-panel border border-slate-800 rounded-2xl p-6 relative">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 border-b border-slate-800/80 pb-4">
         <div>
-          <h3 class="text-lg font-bold text-slate-200">套利最佳化曲線</h3>
-          <p class="text-xs text-slate-400 mt-1">橫軸為模擬交易金額（0 至 20 萬），縱軸為整體盈虧（基準線以上為套利，以下為虧損）</p>
+          <h3 class="text-lg font-bold text-slate-200 tracking-wide uppercase">套利最佳化曲線</h3>
+          <p class="text-xs text-slate-500 mt-1">極限演算：觀察信用卡回饋碰頂與平台手續費（線性無上限）交會的死亡交叉點</p>
         </div>
-        <div class="mt-2 md:mt-0 flex items-center space-x-2 text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-          <span class="w-3 h-3 bg-blue-500 rounded-full inline-block"></span>
-          <span>盈虧曲線</span>
+        <div class="mt-3 md:mt-0 flex items-center space-x-2.5 text-xs text-slate-400 bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-800 font-bold">
+          <span class="w-2.5 h-2.5 bg-cyan-400 rounded-full inline-block animate-pulse" style="box-shadow: 0 0 8px #22d3ee;"></span>
+          <span class="text-cyan-400 tracking-wider font-mono">NET REVENUE CURVE</span>
         </div>
       </div>
       <div id="chartContainer" class="w-full" style="height: 380px;"></div>
@@ -229,19 +273,19 @@
       { id: 'promo_3', name: '6月全月活動 (滿5k享16.5%)', group: '6月全月', threshold: 5000, type: 'percent', value: 16.5, cap: 300, checked: true }
     ];
 
-    // 渲染活動列表
+    // 渲染活動列表 (賽博朋克風小卡)
     function renderPromos() {
       const container = document.getElementById('promoListContainer');
       container.innerHTML = promos.map(p => `
-        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-700/40">
-          <div class="flex items-center space-x-3">
-            <input type="checkbox" id="${p.id}" ${p.checked ? 'checked' : ''} onchange="togglePromo('${p.id}')" class="h-5 w-5 text-blue-600 rounded bg-slate-950 border-slate-700 focus:ring-blue-500" />
+        <div class="flex items-center justify-between p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 hover:border-cyan-500/20 transition-all">
+          <div class="flex items-center space-x-3.5">
+            <input type="checkbox" id="${p.id}" ${p.checked ? 'checked' : ''} onchange="togglePromo('${p.id}')" class="h-5 w-5 text-cyan-500 rounded bg-slate-950 border-slate-800 focus:ring-cyan-500 focus:ring-offset-slate-900" />
             <div class="flex flex-col">
-              <span class="text-sm font-medium">${p.name}</span>
-              <span class="text-[10px] text-slate-500 mt-0.5">群組: ${p.group || '無'} | 門檻: $${p.threshold.toLocaleString()} | 回饋: ${p.type === 'fixed' ? '$' + p.value : p.value + '%'}</span>
+              <span class="text-sm font-semibold text-slate-200">${p.name}</span>
+              <span class="text-[10px] text-slate-500 mt-1 font-mono uppercase">群組: ${p.group || '無'} // 門檻: $${p.threshold.toLocaleString()} // 回饋: ${p.type === 'fixed' ? '$' + p.value.toLocaleString() : p.value + '%'}</span>
             </div>
           </div>
-          <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded border border-slate-700/50">上限 $${p.cap.toLocaleString()}</span>
+          <span class="text-xs bg-slate-900 text-cyan-400 font-bold px-2.5 py-1 rounded border border-cyan-500/20 font-mono">CAP $${p.cap.toLocaleString()}</span>
         </div>
       `).join('');
     }
@@ -362,7 +406,7 @@
 
       // 更新買家區
       ui.buyerReward.innerText = `+ $${result.buyer.toLocaleString()}`;
-      ui.buyerDetail.innerText = `信用卡回饋: $${result.buyerCc.toLocaleString()} | 活動擇優加總: $${result.buyerPromo.toLocaleString()}`;
+      ui.buyerDetail.innerText = `信用卡回饋: $${result.buyerCc.toLocaleString()} | 活動群組擇優: $${result.buyerPromo.toLocaleString()}`;
 
       // 更新賣家區
       ui.sellerFee.innerText = `- $${result.seller.toLocaleString()}`;
@@ -372,31 +416,31 @@
       if (inputs.hasShippingFee.checked) {
         const p = parseFloat(inputs.price.value) || 0;
         if (p * 0.06 <= 60) {
-          ui.shippingBadge.innerText = `已自動擇優: 6% ($${result.sellerShip})`;
-          ui.shippingBadge.className = "text-xs bg-emerald-900/40 text-emerald-400 px-2.5 py-1 rounded font-bold border border-emerald-800/50";
+          ui.shippingBadge.innerText = `自動擇優: 6% ($${result.sellerShip})`;
+          ui.shippingBadge.className = "text-xs bg-emerald-950/50 text-emerald-400 px-3 py-1 rounded font-bold border border-emerald-500/20";
         } else {
-          ui.shippingBadge.innerText = `已自動擇優: 固定 $60`;
-          ui.shippingBadge.className = "text-xs bg-blue-900/40 text-blue-400 px-2.5 py-1 rounded font-bold border border-blue-800/50";
+          ui.shippingBadge.innerText = `自動擇優: 固定 $60`;
+          ui.shippingBadge.className = "text-xs bg-cyan-950/50 text-cyan-400 px-3 py-1 rounded font-bold border border-cyan-500/20";
         }
       } else {
         ui.shippingBadge.innerText = "未啟用";
-        ui.shippingBadge.className = "text-xs bg-slate-800 text-slate-500 px-2.5 py-1 rounded";
+        ui.shippingBadge.className = "text-xs bg-slate-950 text-slate-500 px-3 py-1 rounded border border-slate-800";
       }
 
-      // 更新盈虧結果
+      // 更新盈虧結果與面板霓虹發光色
       const isProfit = result.net >= 0;
       ui.netProfit.innerText = `${isProfit ? '+' : ''}$${result.net.toLocaleString()}`;
       
       if (isProfit) {
-        ui.netProfit.className = "text-4xl font-black text-emerald-400 mt-2";
-        ui.netCard.className = "rounded-2xl p-6 relative overflow-hidden transition-all duration-300 bg-emerald-500/10 border border-emerald-500/30";
-        ui.netDesc.className = "text-sm font-bold text-emerald-400 mt-2";
-        ui.netDesc.innerText = "👍 套利成功！此方案能成功賺得平台利差。";
+        ui.netProfit.className = "text-4xl font-black text-emerald-300 mt-2.5 neon-text-emerald";
+        ui.netCard.className = "rounded-2xl p-6 relative overflow-hidden transition-all duration-300 bg-emerald-950/20 border-emerald-500/40 neon-glow-emerald";
+        ui.netDesc.className = "text-xs font-semibold text-emerald-400 mt-2 uppercase tracking-widest";
+        ui.netDesc.innerText = "📟 ARBITRAGE DETECTED // 建議透過平台套利";
       } else {
-        ui.netProfit.className = "text-4xl font-black text-rose-400 mt-2";
-        ui.netCard.className = "rounded-2xl p-6 relative overflow-hidden transition-all duration-300 bg-rose-500/10 border border-rose-500/30";
-        ui.netDesc.className = "text-sm font-bold text-rose-400 mt-2";
-        ui.netDesc.innerText = "❌ 平台反噬！手續費已超越回饋，私下現金更划算。";
+        ui.netProfit.className = "text-4xl font-black text-rose-300 mt-2.5 neon-text-rose";
+        ui.netCard.className = "rounded-2xl p-6 relative overflow-hidden transition-all duration-300 bg-rose-950/20 border-rose-500/40 neon-glow-rose";
+        ui.netDesc.className = "text-xs font-semibold text-rose-400 mt-2 uppercase tracking-widest";
+        ui.netDesc.innerText = "⚠️ PLATFORM FEES WARNING // 建議線下面交";
       }
 
       // 產生趨勢圖數據 (0 ~ 20 萬，每 5000 元一個節點)
@@ -407,54 +451,61 @@
         yData.push(calculateData(val).net);
       }
 
-      // 渲染 ECharts
+      // 渲染 ECharts (調校成帶發光的雷射光譜線效果)
       myChart.setOption({
         backgroundColor: 'transparent',
-        grid: { top: 15, right: 15, bottom: 25, left: 60 },
+        grid: { top: 20, right: 20, bottom: 25, left: 60 },
         tooltip: {
           trigger: 'axis',
-          backgroundColor: '#0f172a',
-          borderColor: '#334155',
-          textStyle: { color: '#f1f5f9' },
+          backgroundColor: '#030712',
+          borderColor: '#1e293b',
+          borderWidth: 1,
+          textStyle: { color: '#e2e8f0', fontSize: 11, fontFamily: 'monospace' },
           formatter: function (params) {
             let val = params[0].value;
             let amount = params[0].axisValue;
-            let profitColor = val >= 0 ? '#34d399' : '#f87171';
-            return `<div class="p-1">
-                      <div class="text-xs text-slate-400">交易金額: <span class="font-bold text-slate-200">$${parseInt(amount).toLocaleString()}</span></div>
-                      <div class="text-xs mt-1">親友盈虧: <span class="font-black" style="color: ${profitColor}">$${val.toLocaleString()}</span></div>
+            let profitColor = val >= 0 ? '#10b981' : '#f43f5e';
+            let label = val >= 0 ? '套利利差' : '淨虧損';
+            return `<div class="p-1 font-mono">
+                      <div class="text-slate-400">交易金額: <span class="text-slate-200 font-bold">$${parseInt(amount).toLocaleString()}</span></div>
+                      <div class="mt-1">${label}: <span class="font-black" style="color: ${profitColor}">$${val.toLocaleString()}</span></div>
                     </div>`;
           }
         },
         xAxis: {
           type: 'category',
           data: xData,
-          axisLabel: { formatter: (val) => `$${val/1000}k`, color: '#94a3b8' },
-          axisLine: { lineStyle: { color: '#334155' } },
+          axisLabel: { formatter: (val) => `$${val/1000}k`, color: '#64748b', fontSize: 10, fontFamily: 'monospace' },
+          axisLine: { lineStyle: { color: '#1e293b' } },
           splitLine: { show: false }
         },
         yAxis: {
           type: 'value',
-          axisLabel: { color: '#94a3b8' },
+          axisLabel: { color: '#64748b', fontSize: 10, fontFamily: 'monospace' },
           axisLine: { show: false },
-          splitLine: { lineStyle: { color: '#1e293b' } }
+          splitLine: { lineStyle: { color: '#0f172a' } }
         },
         series: [{
           data: yData,
           type: 'line',
           smooth: true,
           symbol: 'none',
-          lineStyle: { width: 3.5, color: '#3b82f6' },
+          lineStyle: { 
+            width: 4, 
+            color: '#22d3ee',
+            shadowBlur: 10,
+            shadowColor: 'rgba(34, 211, 238, 0.8)' // 雷射霓虹發光線
+          },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(59, 130, 246, 0.25)' },
-              { offset: 1, color: 'rgba(59, 130, 246, 0)' }
+              { offset: 0, color: 'rgba(6, 182, 212, 0.15)' },
+              { offset: 1, color: 'rgba(6, 182, 212, 0)' }
             ])
           },
           markLine: {
             symbol: ['none', 'none'],
             data: [{ yAxis: 0 }],
-            lineStyle: { color: '#f87171', type: 'dashed', width: 1.5 },
+            lineStyle: { color: '#f43f5e', type: 'dashed', width: 2 },
             label: { show: false }
           }
         }]
@@ -498,4 +549,4 @@
     updateDashboard();
   </script>
 </body>
-</html>
+</html>```

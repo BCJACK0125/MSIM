@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MSIM 肥水不落外人田專案</title>
+  <title>Arbitrage vs Platform | 親友交易決策儀表板</title>
   <!-- 引入 Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- 引入 ECharts CDN -->
@@ -135,7 +135,7 @@
                   <option value="percent">百分比 (%)</option>
                 </select>
                 <input type="number" step="0.1" id="newPromoValue" placeholder="回饋數值" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
-                <input type="number" id="newPromoCap" placeholder="上限 ($) (百分比用)" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
+                <input type="number" id="newPromoCap" placeholder="上限 ($) (百分比空則無上限)" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-400" />
               </div>
               <button id="addPromoBtn" class="w-full py-2 bg-cyan-950/30 hover:bg-cyan-500/20 text-cyan-400 text-xs font-bold rounded-lg border border-cyan-500/20 transition duration-300 uppercase tracking-widest">新增並套用</button>
             </div>
@@ -266,10 +266,11 @@
       shippingBadge: document.getElementById('shippingAppliedBadge')
     };
 
-    // 擴展活動資料結構：引進 group (群組) 的概念
+    // 擴展活動資料結構：引進 group (群組) 的概念，並新增高門檻活動
     let promos = [
       { id: 'promo_1', name: '6.18年中慶 (滿12k送800)', group: '6.18年中慶', threshold: 12000, type: 'fixed', value: 800, cap: 800, checked: true },
       { id: 'promo_2', name: '6.18年中慶 (滿26k送1800)', group: '6.18年中慶', threshold: 26000, type: 'fixed', value: 1800, cap: 1800, checked: true },
+      { id: 'promo_2_5', name: '618高檻購物優惠 (滿40k送3000)', group: '6.18年中慶', threshold: 40000, type: 'fixed', value: 3000, cap: 3000, checked: true },
       { id: 'promo_3', name: '6月全月活動 (滿5k享16.5%)', group: '6月全月', threshold: 5000, type: 'percent', value: 16.5, cap: 300, checked: true }
     ];
 
@@ -298,14 +299,20 @@
       }
     }
 
-    // 新增自訂活動 logic
+    // 新增自訂活動 logic - 修正了回饋上限 (cap) 的解析邏輯 Bug
     document.getElementById('addPromoBtn').addEventListener('click', () => {
       const name = document.getElementById('newPromoName').value || '自訂活動';
       const group = document.getElementById('newPromoGroup').value || '獨立活動';
       const threshold = parseFloat(document.getElementById('newPromoThreshold').value) || 0;
       const type = document.getElementById('newPromoType').value;
       const value = parseFloat(document.getElementById('newPromoValue').value) || 0;
-      const cap = parseFloat(document.getElementById('newPromoCap').value) || value;
+      
+      // 修補：百分比活動如無自訂上限，給予超大值 (99,999,999) 避免被誤卡死為 $value 元上限
+      const capVal = document.getElementById('newPromoCap').value;
+      let cap = parseFloat(capVal);
+      if (isNaN(cap)) {
+        cap = (type === 'percent') ? 99999999 : value;
+      }
       
       promos.push({ 
         id: 'promo_' + Date.now(), 
@@ -526,8 +533,8 @@
         inputs.price.value = 30000;
         inputs.ccRate.value = 4.5;
         inputs.ccCap.value = 1500;
-        // 預設開啟第一個 6.18 年中慶活動
-        promos.forEach((p, index) => p.checked = (p.group === '6.18年中慶' || index === 2)); 
+        // 預設開啟「6.18年中慶」群組活動與 6 月全月活動
+        promos.forEach((p, index) => p.checked = (p.group === '6.18年中慶' || p.group === '6月全月')); 
         inputs.sellerType.value = 'general';
         inputs.categoryRate.value = 5.0; // 手機平板與周邊為 5% 成交費
         inputs.hasShippingFee.checked = true;
@@ -549,4 +556,4 @@
     updateDashboard();
   </script>
 </body>
-</html>```
+</html>

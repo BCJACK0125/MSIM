@@ -248,6 +248,9 @@
   </div>
 
   <script>
+    document.getElementById('model-name').innerText = aiModel;
+    document.getElementById('sync-time').innerText = updateTime;
+    
     // 綁定 DOM 控制項
     const inputs = {
       price: document.getElementById('testPrice'),

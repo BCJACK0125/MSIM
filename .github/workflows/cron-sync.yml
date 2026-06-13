@@ -1,0 +1,37 @@
+name: 每日自動更新玉山銀行優惠
+
+on:
+  schedule:
+    # 每天凌晨 4 點 (UTC 20:00) 自動跑一次爬蟲
+    - cron: '0 20 * * *'
+  workflow_dispatch: # 允許手動點擊按鈕觸發執行
+
+jobs:
+  update-promos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢出專案代碼
+        uses: actions/checkout@v3
+
+      - name: 初始化 Node.js 環境
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 安裝爬蟲依賴套件
+        run: npm install axios cheerio
+
+      - name: 執行同步與 AI 分析腳本
+        env:
+          # 使用 GitHub 平台免費提供給 Actions 的權限金鑰，用來呼叫 GitHub Models AI
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node sync-promos.js
+
+      - name: 自動 Commit 並 Push 回儲存庫
+        run: |
+          git config --global user.name "MISM Bot"
+          git config --global user.email "bot@mism.io"
+          git add index.html
+          # 只有在檔案真的有變動時才 commit，避免重複跑出空白 Commit
+          git diff-index --quiet HEAD || git commit -m "🤖 自動化：更新玉山銀行最新刷卡活動回饋"
+          git push origin main

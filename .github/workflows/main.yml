@@ -4,7 +4,11 @@ on:
   schedule:
     # 每天台北時間 09:00 執行一次 (UTC 01:00)
     - cron: '0 1 * * *'
-  workflow_dispatch: # 允許你隨時點擊手動測試發信
+  workflow_dispatch: # 允許隨時點擊手動測試
+
+# 關鍵修正 1：明確宣告 Actions 擁有將檔案寫回 Repository 的權限
+permissions:
+  contents: write
 
 jobs:
   run_scraper:
@@ -24,22 +28,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests beautifulsoup4
 
-    - name: 4. 執行爬蟲並發送 Gmail 
-      # 關鍵：在這裡將 GitHub 密鑰傳遞給 Python 程式
+    - name: 4. 執行爬蟲、呼叫 AI 並發送 Gmail 
+      # 關鍵修正 2：在這裡加入 GITHUB_TOKEN，讓 Python 可以免費呼叫 GitHub Models AI
       env:
         GMAIL_USER: ${{ secrets.GMAIL_USER }}
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: python scraper.py
 
-    - name: 5. 備份 JSON 變更回 GitHub 倉庫
+    - name: 5. 備份 JSON 與 HTML 變更回 GitHub 倉庫
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add esun_discounts.json
+        
+        # 關鍵修正 3：同時追蹤 json 與 index.html 的變更
+        git add esun_discounts.json index.html
         
         if ! git diff --cached --quiet; then
-          git commit -m "自動備份：更新優惠資料紀錄 ($(date +'%Y-%m-%d %H:%M'))"
+          git commit -m "自動備份：更新優惠與前端網頁資料 ($(date +'%Y-%m-%d %H:%M'))"
           git push
         else
-          echo "資料與昨日相同，僅發送信件，不重複提交 Commit。"
+          echo "資料與昨日相同，不重複提交 Commit。"
         fi

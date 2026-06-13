@@ -3,6 +3,11 @@ const path = require('path');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+// 前端資料儲存區（會由 Python 自動覆寫）
+let promos = [];
+let aiModel = "尚未更新";
+let updateTime = "尚未更新";
+
 // 1. 設定玉山銀行優惠網頁 URL
 const TARGET_URL = 'https://www.esunbank.com.tw/zh-tw/personal/credit-card/discount/shopInfo?sno=2100_06';
 
